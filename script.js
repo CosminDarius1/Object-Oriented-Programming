@@ -26,7 +26,7 @@ Person.hey();
 // After calling a function using new operator
 // 1. new {} -  New empty object is created
 // 2.function is called, this = {}, this keyword is this new empty object
-// 3.  {} linked to prototype
+// 3.  The newly created object - {} is  linked to prototype
 // 4.function automatically returns the object from the beginning
 
 const fratele = new Person('Fratele', 2004);
@@ -44,6 +44,7 @@ Person.prototype.calcAge = function () {
 cosmin.calcAge();
 fratele.calcAge();
 mother.calcAge();
+console.log(Person.prototype);
 // console.log(cosmin.__proto__);
 console.log(cosmin.__proto__ === Person.prototype);
 
@@ -110,7 +111,9 @@ class PersonCl {
   }
 
   //Methods will be added to .prototype property
-  // Instance Methods
+  //Inside of the class Object but outside of the constructor function!
+
+  //INSTANCE METHODS !
   calcAge() {
     console.log(2037 - this.birthYear);
   }
@@ -174,8 +177,15 @@ account.latestMovement = 50;
 console.log(account.movements);
 
 //Static method call
+Person.hey = function () {
+  console.log('Hey there');
+};
+
+Person.hey();
 PersonCl.hey();
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////// // Object.create() function
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Object.create() function
 
 const PersonProto = {
   calcAge() {
@@ -216,6 +226,7 @@ class CarCl {
   get speedUS() {
     return `${this.model} is going with ${this.speed / 1.6} mi/h`;
   }
+  // On SET method we always need to take exactly one ARGUMENT!
   set speedUS(speed) {
     this.speed = speed * 1.6;
   }
@@ -229,3 +240,60 @@ ford.speedUS = 50;
 console.log(ford);
 
 console.log(ford);
+
+// INHERITANCE BETWEEN "CLASSES" : CONSTRUCTOR FUNCTIONS
+
+const Student = function (firstName, birthYear, course) {
+  Person.call(this, firstName, birthYear);
+  this.course = course;
+};
+
+// Linking prototypes
+Student.prototype = Object.create(Person.prototype);
+
+Student.prototype.introduce = function () {
+  console.log(`My name is ${this.firstName} and I study ${this.course}`);
+};
+
+const strula = new Student('Strula', 2000, 'IT');
+console.log(strula);
+strula.introduce();
+strula.calcAge();
+
+console.log(strula.__proto__);
+console.log(strula.__proto__.__proto__);
+
+Student.prototype.constructor = Student;
+
+// HOW we can call a function and in the same time set the THIS keyword inside that function?
+// by using  'call' method like above
+
+// CHALLENGE 3
+
+const EV = function (make, speed, charge) {
+  Car.call(this, make, speed);
+  this.charge = charge;
+};
+
+//Link the prototypes
+EV.prototype = Object.create(Car.prototype);
+
+EV.prototype.chargeBattery = function (chargeTo) {
+  this.charge = chargeTo;
+};
+EV.prototype.accelerate = function () {
+  this.speed += 20;
+  this.charge -= 1;
+  console.log(
+    `${this.make} going at ${this.speed} km/h , with a charge of ${this.charge} % `
+  );
+};
+const tesla = new EV('Tesla', 120, 90);
+tesla.accelerate();
+tesla.accelerate();
+tesla.accelerate();
+tesla.accelerate();
+tesla.brake();
+tesla.chargeBattery(90);
+
+console.log(EV.prototype);
