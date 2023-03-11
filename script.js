@@ -254,6 +254,8 @@ Student.prototype = Object.create(Person.prototype);
 Student.prototype.introduce = function () {
   console.log(`My name is ${this.firstName} and I study ${this.course}`);
 };
+// HOW we can call a function and in the same time set the THIS keyword inside that function?
+// by using  'call' method like above
 
 const strula = new Student('Strula', 2000, 'IT');
 console.log(strula);
@@ -264,9 +266,6 @@ console.log(strula.__proto__);
 console.log(strula.__proto__.__proto__);
 
 Student.prototype.constructor = Student;
-
-// HOW we can call a function and in the same time set the THIS keyword inside that function?
-// by using  'call' method like above
 
 // CHALLENGE 3
 
@@ -297,3 +296,174 @@ tesla.brake();
 tesla.chargeBattery(90);
 
 console.log(EV.prototype);
+
+// INHERITANCE BETWEEN CLASSES /// ES6 Classes
+class StudentCl extends PersonCl {
+  constructor(fullName, birthYear, course) {
+    // Always needs to happen first!
+    //Othwerwise we wouldn't be able to access the 'this' keyword.
+    super(fullName, birthYear);
+    this.course = course;
+  }
+  introduce() {
+    console.log(`My name is ${this.fullName} and I study ${this.course}`);
+  }
+  calcAge() {
+    console.log(
+      `I'm ${
+        2023 - this.birthYear
+      } years old, but as a student I feel more like ${
+        2023 - this.birthYear + 10
+      } `
+    );
+  }
+}
+
+const martha = new StudentCl('Martha Jones', 1995, 'Computer Science');
+martha.introduce();
+martha.calcAge();
+martha.greet();
+
+// ** When we implement the inheritance between the ES6 classes  we link the prototype by using the 'extends' keyword , we still need a constructor function with same arguments like in the parent class but with some additional ones as well
+// *** When using the ES6 classes we don't need to call the function by using the call method like in the constructor functions.
+// *** What we do instead in ES6 classes we call the 'super' function. super is the constructor function of the parent class
+
+// INHERITANCE BETWEEN CLASSES USING
+// Object.create()
+
+//Creating a prototype using Object.create method
+// const PersonProto = {
+//   calcAge() {
+//     console.log(2037 - this.birthYear);
+//   },
+
+//   initName(firstName, birthYear) {
+//     this.firstName = firstName;
+//     this.birthYear = birthYear;
+//   },
+// };
+
+// const claudel = Object.create(PersonProto);
+// console.log(claudel);
+
+const StudentProto = Object.create(PersonProto);
+StudentProto.initName = function (firstName, birthYear, course) {
+  PersonProto.initName.call(this, firstName, birthYear);
+  this.course = course;
+};
+
+StudentProto.introduce = function () {
+  console.log(`My name is ${this.firstName} and I study ${this.course}`);
+};
+const jay = Object.create(StudentProto);
+jay.initName('Jay', 2002, 'Computer Science');
+jay.introduce();
+jay.calcAge();
+
+// Another Class Example
+
+class Account {
+  // this is how we define
+  // 1) Public fields(instances)
+  locale = navigator.language;
+
+  // 2)  Private fields(instances)
+  // '#' symbol makes a field or an instance PRIVATE or unaccesible
+  #movements = [];
+  #pin;
+
+  constructor(owner, currency, pin) {
+    this.owner = owner;
+    this.currency = currency;
+    this.#pin = pin;
+    //Protected property
+    this.#movements = [];
+    this.locale = navigator.language;
+
+    console.log(`Thanks for opening an account, ${owner}`);
+  }
+
+  // 3) Public methods
+
+  //PUBLIC INTERFACE of our Objects also called API
+
+  getMovements() {
+    return this.#movements;
+  }
+  deposit(val) {
+    this.#movements.push(val);
+    return this;
+  }
+  withdrawal(val) {
+    this.deposit(-val);
+    return this;
+  }
+
+  requestLoan(val) {
+    if (this._approveLoan(val)) {
+      this.deposit(val);
+      console.log(`Loan approved`);
+      return this;
+    }
+  }
+
+  // 4) Private methods
+  _approveLoan(val) {
+    return true;
+  }
+}
+const acc1 = new Account('Cosmin', '£', 1111);
+console.log(acc1);
+acc1.deposit(250);
+acc1.withdrawal(140);
+acc1.requestLoan(100);
+
+console.log(acc1);
+
+// console.log(acc1.#pin);
+// console.log(acc1.#approveLoan(100));
+
+//Chaining methods
+acc1
+  .deposit(300)
+  .deposit(500)
+  .withdrawal(35)
+  .requestLoan(2500)
+  .withdrawal(4000);
+console.log(acc1.getMovements());
+
+//Challenge 4
+
+class EVCl extends CarCl {
+  #charge;
+  constructor(make, speed, charge) {
+    super(make, speed);
+    this.#charge = charge;
+  }
+  accelerate() {
+    this.speed += 10;
+    this.#charge--;
+    console.log(
+      `${this.model} is going at ${this.speed} km/h with a battery charge of ${
+        this.#charge
+      } %`
+    );
+    return this;
+  }
+  brake() {
+    this.speed -= 5;
+    console.log(`${this.model} is going at ${this.speed} km/h with a battery`);
+    return this;
+  }
+}
+const rivian = new EVCl('Rivian', 120, 23);
+
+rivian.accelerate().accelerate().brake().accelerate().accelerate();
+
+// class StudentCl extends PersonCl {
+//   constructor(fullName, birthYear, course) {
+//     // Always needs to happen first!
+//     //Othwerwise we wouldn't be able to access the 'this' keyword.
+//     super(fullName, birthYear);
+//     this.course = course;
+//   }
